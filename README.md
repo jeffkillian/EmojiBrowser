@@ -2,6 +2,8 @@
 
 A web-based emoji browser with pagination, search, and selection tracking. Perfect for browsing large collections of custom Slack emojis.
 
+![EmojiBrowser Screenshot](screenshot.png)
+
 ## Features
 
 - **Pagination**: Browse 50 emojis per page

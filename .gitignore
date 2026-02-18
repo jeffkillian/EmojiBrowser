@@ -1,8 +1,10 @@
 # Emoji images (users should provide their own)
-emojis/
+emojis/*
+!emojis/.gitkeep
 
 # Selected emojis folder
-selected/
+selected/*
+!selected/.gitkeep
 
 # Generated files
 emoji_browser.html
