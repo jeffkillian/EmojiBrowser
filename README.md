@@ -1,6 +1,6 @@
 # EmojiBrowser
 
-A web-based emoji browser with pagination, search, and selection tracking. Perfect for browsing large collections of custom Slack emojis or images. within a directory.
+A web-based emoji browser with pagination, search, and selection tracking. Perfect for browsing large collections of custom Slack emojis or images within a directory.
 
 ![EmojiBrowser Screenshot](screenshot.png)
 
@@ -26,15 +26,13 @@ A web-based emoji browser with pagination, search, and selection tracking. Perfe
 1. Clone this repository:
 
    ```bash
-   cd ~/Development
    git clone https://github.com/jeffkillian/EmojiBrowser
    cd EmojiBrowser
    ```
 
-2. Add your emoji images to the emoji directory (it will recursively look, so adding folders in there is fine):
+2. (Optional) Add your own emoji images to the `emojis/` directory. The repo includes sample images to get you started:
 
    ```bash
-   mkdir emojis
    cp /path/to/your/emoji/images/* emojis/
    ```
 
@@ -57,32 +55,26 @@ If you prefer to run the steps manually:
    cd EmojiBrowser
    ```
 
-2. Create an `emojis` directory:
-
-   ```bash
-   mkdir emojis
-   ```
-
-3. Copy your emoji images into the `emojis/` directory:
+2. (Optional) Add your own emoji images to the `emojis/` directory. The repo includes sample images to get you started:
 
    ```bash
    cp /path/to/your/emoji/images/* emojis/
    ```
 
-4. Generate the HTML file with embedded emoji data:
+3. Generate the HTML file with embedded emoji data:
 
    ```bash
    chmod +x generate_html.sh
    ./generate_html.sh
    ```
 
-5. Start the server:
+4. Start the server:
 
    ```bash
    node start_server.js
    ```
 
-6. Open your browser to:
+5. Open your browser to:
    ```
    http://localhost:8000/emoji_browser.html
    ```
