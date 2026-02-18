@@ -51,18 +51,24 @@ const server = http.createServer((req, res) => {
 
     // API endpoints for file operations
     if (req.method === 'GET' && req.url === '/api/selected') {
-        // Return list of files in selected directory recursively
-        const { execSync } = require('child_process');
-        try {
-            const files = execSync('find ./selected -type f 2>/dev/null | sed "s|^./selected/||"', { encoding: 'utf8' })
-                .split('\n')
-                .filter(f => f.length > 0);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ files: files }));
-        } catch (err) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ files: [] }));
-        }
+        // Return list of files in selected directory (flat structure)
+        fs.readdir('./selected', (err, files) => {
+            if (err) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ files: [] }));
+            } else {
+                // Filter out directories, only return files
+                const fileList = files.filter(f => {
+                    try {
+                        return fs.statSync(path.join('./selected', f)).isFile();
+                    } catch {
+                        return false;
+                    }
+                });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ files: fileList }));
+            }
+        });
         return;
     }
 
@@ -75,29 +81,19 @@ const server = http.createServer((req, res) => {
             }
 
             const sourcePath = path.join('./emojis', data.filename);
-            const destPath = path.join('./selected', data.filename);
+            // Flatten structure - just use basename for destination
+            const destPath = path.join('./selected', path.basename(data.filename));
 
-            // Create subdirectories if needed
-            const destDir = path.dirname(destPath);
-            fs.mkdir(destDir, { recursive: true }, (mkdirError) => {
-                if (mkdirError) {
-                    console.error('Mkdir error:', mkdirError);
+            fs.copyFile(sourcePath, destPath, (error) => {
+                if (error) {
+                    console.error('Copy error:', error);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: mkdirError.message }));
-                    return;
+                    res.end(JSON.stringify({ error: error.message }));
+                } else {
+                    console.log(`Copied: ${data.filename} -> ${path.basename(data.filename)}`);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true }));
                 }
-
-                fs.copyFile(sourcePath, destPath, (error) => {
-                    if (error) {
-                        console.error('Copy error:', error);
-                        res.writeHead(500, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ error: error.message }));
-                    } else {
-                        console.log(`Copied: ${data.filename}`);
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ success: true }));
-                    }
-                });
             });
         });
         return;
@@ -111,7 +107,8 @@ const server = http.createServer((req, res) => {
                 return;
             }
 
-            const filePath = path.join('./selected', data.filename);
+            // Use basename since we flatten the structure
+            const filePath = path.join('./selected', path.basename(data.filename));
 
             fs.unlink(filePath, (error) => {
                 if (error && error.code !== 'ENOENT') {
@@ -119,7 +116,7 @@ const server = http.createServer((req, res) => {
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: error.message }));
                 } else {
-                    console.log(`Deleted: ${data.filename}`);
+                    console.log(`Deleted: ${path.basename(data.filename)}`);
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ success: true }));
                 }

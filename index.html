@@ -335,7 +335,9 @@ EMOJI_DATA_PLACEHOLDER
             const selectedArray = [...selectedEmojis].sort();
 
             selectedArray.forEach(filename => {
-                const name = filename.replace(/\.[^.]*$/, '');
+                // Extract just the basename for display
+                const basename = filename.split('/').pop();
+                const name = basename.replace(/\.[^.]*$/, '');
 
                 const card = document.createElement('div');
                 card.className = 'emoji-card selected';
@@ -352,6 +354,8 @@ EMOJI_DATA_PLACEHOLDER
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'emoji-name';
                 nameDiv.textContent = name;
+                // Add tooltip with full path
+                nameDiv.title = filename;
 
                 card.appendChild(img);
                 card.appendChild(nameDiv);
@@ -483,7 +487,9 @@ EMOJI_DATA_PLACEHOLDER
             const pageEmojis = filteredEmojis.slice(start, end);
 
             pageEmojis.forEach(filename => {
-                const name = filename.replace(/\.[^.]*$/, '');
+                // Extract just the basename for display
+                const basename = filename.split('/').pop();
+                const name = basename.replace(/\.[^.]*$/, '');
 
                 const card = document.createElement('div');
                 card.className = 'emoji-card';
@@ -505,6 +511,8 @@ EMOJI_DATA_PLACEHOLDER
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'emoji-name';
                 nameDiv.textContent = name;
+                // Add tooltip with full path
+                nameDiv.title = filename;
 
                 card.appendChild(img);
                 card.appendChild(nameDiv);
