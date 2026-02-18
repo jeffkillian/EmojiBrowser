@@ -4,7 +4,8 @@
   "description": "A web-based emoji browser with pagination, search, and selection tracking",
   "main": "start_server.js",
   "scripts": {
-    "start": "node start_server.js",
+    "start": "./start.sh",
+    "server": "node start_server.js",
     "generate": "./generate_html.sh"
   },
   "keywords": [

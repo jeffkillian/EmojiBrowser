@@ -19,7 +19,31 @@ A web-based emoji browser with pagination, search, and selection tracking. Perfe
 - Node.js installed on your system
 - A folder of emoji images (PNG, JPG, GIF, etc.)
 
-### Installation
+### Quick Start
+
+1. Clone this repository:
+   ```bash
+   cd ~/Development
+   git clone <your-repo-url>
+   cd EmojiBrowser
+   ```
+
+2. Add your emoji images:
+   ```bash
+   mkdir emojis
+   cp /path/to/your/emoji/images/* emojis/
+   ```
+
+3. Run the start script:
+   ```bash
+   ./start.sh
+   ```
+
+That's it! The browser will automatically open to `http://localhost:8000/emoji_browser.html`
+
+### Manual Installation
+
+If you prefer to run the steps manually:
 
 1. Clone this repository:
    ```bash
