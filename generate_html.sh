@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to generate the final HTML with emoji data embedded
+# Script to generate the final HTML and JS with emoji data embedded
 
 if [ ! -d "emojis" ]; then
     echo "Error: 'emojis' directory not found!"
@@ -28,11 +28,14 @@ cat emoji_list.txt | awk 'BEGIN {print ""} {
     printf "            \"%s\"", filename
 } END {print ""}' > emoji_array.txt
 
-# Insert emoji data into HTML template
-sed -e '/EMOJI_DATA_PLACEHOLDER/r emoji_array.txt' -e '/EMOJI_DATA_PLACEHOLDER/d' index.html > emoji_browser.html
+# Insert emoji data into JS template
+sed -e '/EMOJI_DATA_PLACEHOLDER/r emoji_array.txt' -e '/EMOJI_DATA_PLACEHOLDER/d' app.js > emoji_browser.js
+
+# Update HTML template to use emoji_browser.js instead of app.js
+sed 's/app\.js/emoji_browser.js/g' index.html > emoji_browser.html
 
 # Count emojis
 EMOJI_COUNT=$(wc -l < emoji_list.txt | tr -d ' ')
 
-echo "✓ Generated emoji_browser.html with $EMOJI_COUNT emojis"
+echo "✓ Generated emoji_browser.html and emoji_browser.js with $EMOJI_COUNT emojis"
 echo "✓ You can now start the server with: node start_server.js"

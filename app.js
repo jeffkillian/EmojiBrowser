@@ -1,0 +1,296 @@
+// Emoji filenames embedded directly
+const allEmojiFiles = [
+EMOJI_DATA_PLACEHOLDER
+];
+
+let filteredEmojis = [];
+let currentPage = 1;
+const itemsPerPage = 50;
+let totalPages = 1;
+let selectedEmojis = new Set();
+
+// Load selected emojis from localStorage and sync with server
+async function loadSelectedEmojis() {
+    const saved = localStorage.getItem('selectedEmojis');
+    if (saved) {
+        selectedEmojis = new Set(JSON.parse(saved));
+    }
+
+    // Sync with server's selected folder
+    try {
+        const response = await fetch('/api/selected');
+        const data = await response.json();
+        const serverFiles = new Set(data.files);
+
+        // Copy any files in localStorage but not on server
+        for (const filename of selectedEmojis) {
+            if (!serverFiles.has(filename)) {
+                await fetch('/api/select', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: filename })
+                });
+            }
+        }
+
+        // Add any files on server but not in localStorage
+        for (const filename of serverFiles) {
+            if (!selectedEmojis.has(filename)) {
+                selectedEmojis.add(filename);
+            }
+        }
+
+        saveSelectedEmojis();
+    } catch (err) {
+        console.error('Sync error:', err);
+    }
+
+    updateSelectedCount();
+}
+
+// Save selected emojis to localStorage
+function saveSelectedEmojis() {
+    localStorage.setItem('selectedEmojis', JSON.stringify([...selectedEmojis]));
+    updateSelectedCount();
+}
+
+// Update selected count display
+function updateSelectedCount() {
+    document.getElementById('tab-selected-count').textContent = selectedEmojis.size;
+    document.getElementById('header-selected-count').textContent = selectedEmojis.size;
+    renderSelectedGrid();
+}
+
+// Switch between tabs
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    if (tabName === 'browse') {
+        document.getElementById('browse-tab').classList.add('active');
+    } else if (tabName === 'selected') {
+        document.getElementById('selected-tab').classList.add('active');
+        renderSelectedGrid();
+    }
+}
+
+// Render selected emojis grid
+function renderSelectedGrid() {
+    const grid = document.getElementById('selected-grid');
+    const emptyState = document.getElementById('selected-empty');
+
+    if (selectedEmojis.size === 0) {
+        emptyState.style.display = 'block';
+        grid.style.display = 'none';
+        return;
+    }
+
+    emptyState.style.display = 'none';
+    grid.style.display = 'grid';
+    grid.innerHTML = '';
+
+    const selectedArray = [...selectedEmojis].sort();
+
+    selectedArray.forEach(filename => {
+        // Extract just the basename for display
+        const basename = filename.split('/').pop();
+        const name = basename.replace(/\.[^.]*$/, '');
+
+        const card = document.createElement('div');
+        card.className = 'emoji-card selected';
+
+        // Add click handler to deselect
+        card.addEventListener('click', () => toggleSelection(filename));
+
+        const img = document.createElement('img');
+        img.src = `emojis/${filename}`;
+        img.alt = name;
+        img.className = 'emoji-image';
+        img.loading = 'lazy';
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'emoji-name';
+        nameDiv.textContent = name;
+        // Add tooltip with full path
+        nameDiv.title = filename;
+
+        card.appendChild(img);
+        card.appendChild(nameDiv);
+        grid.appendChild(card);
+    });
+}
+
+// Toggle emoji selection
+function toggleSelection(filename) {
+    if (selectedEmojis.has(filename)) {
+        selectedEmojis.delete(filename);
+        // Call API to delete file from selected folder
+        fetch('/api/deselect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: filename })
+        }).catch(err => console.error('Deselect error:', err));
+    } else {
+        selectedEmojis.add(filename);
+        // Call API to copy file to selected folder
+        fetch('/api/select', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: filename })
+        }).catch(err => console.error('Select error:', err));
+    }
+    saveSelectedEmojis();
+    renderPage();
+}
+
+// Export selected emojis list
+function exportSelected() {
+    if (selectedEmojis.size === 0) {
+        alert('No emojis selected yet!');
+        return;
+    }
+    const list = [...selectedEmojis].sort().join('\n');
+    const blob = new Blob([list], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'selected-emojis.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Clear all selections
+function clearSelected() {
+    if (selectedEmojis.size === 0) {
+        alert('No emojis selected yet!');
+        return;
+    }
+    if (confirm(`Clear all ${selectedEmojis.size} selected emojis?`)) {
+        // Delete all files from selected folder
+        const filesToDelete = [...selectedEmojis];
+        filesToDelete.forEach(filename => {
+            fetch('/api/deselect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: filename })
+            }).catch(err => console.error('Deselect error:', err));
+        });
+        selectedEmojis.clear();
+        saveSelectedEmojis();
+        renderPage();
+    }
+}
+
+// Initialize
+(async function init() {
+    await loadSelectedEmojis();
+    filteredEmojis = allEmojiFiles;
+    totalPages = Math.ceil(filteredEmojis.length / itemsPerPage);
+
+    // Restore saved page from localStorage
+    const savedPage = localStorage.getItem('emojiCurrentPage');
+    if (savedPage) {
+        const pageNum = parseInt(savedPage);
+        if (pageNum >= 1 && pageNum <= totalPages) {
+            currentPage = pageNum;
+        }
+    }
+
+    updateStats();
+    renderPage();
+})();
+
+// Search functionality
+let searchTimeout;
+document.getElementById('search').addEventListener('input', function(e) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+
+        if (searchTerm === '') {
+            filteredEmojis = allEmojiFiles;
+        } else {
+            filteredEmojis = allEmojiFiles.filter(filename => {
+                const name = filename.replace(/\.[^.]*$/, '').toLowerCase();
+                return name.includes(searchTerm);
+            });
+        }
+
+        currentPage = 1;
+        totalPages = Math.ceil(filteredEmojis.length / itemsPerPage);
+        localStorage.setItem('emojiCurrentPage', currentPage);
+        updateStats();
+        renderPage();
+    }, 300);
+});
+
+function updateStats() {
+    const start = (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(currentPage * itemsPerPage, filteredEmojis.length);
+    const percentThrough = ((end / allEmojiFiles.length) * 100).toFixed(1);
+    const statsText = `Total: ${allEmojiFiles.length} emojis | Showing: ${filteredEmojis.length} | Displaying: ${start}-${end} (${percentThrough}%)`;
+    document.getElementById('stats-text').textContent = statsText;
+    document.getElementById('current-page').textContent = currentPage;
+    document.getElementById('total-pages').textContent = totalPages;
+    document.getElementById('page-jump').max = totalPages;
+}
+
+function renderPage() {
+    const grid = document.getElementById('emoji-grid');
+    grid.innerHTML = '';
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = Math.min(start + itemsPerPage, filteredEmojis.length);
+    const pageEmojis = filteredEmojis.slice(start, end);
+
+    pageEmojis.forEach(filename => {
+        // Extract just the basename for display
+        const basename = filename.split('/').pop();
+        const name = basename.replace(/\.[^.]*$/, '');
+
+        const card = document.createElement('div');
+        card.className = 'emoji-card';
+
+        // Check if this emoji is selected
+        if (selectedEmojis.has(filename)) {
+            card.classList.add('selected');
+        }
+
+        // Add click handler
+        card.addEventListener('click', () => toggleSelection(filename));
+
+        const img = document.createElement('img');
+        img.src = `emojis/${filename}`;
+        img.alt = name;
+        img.className = 'emoji-image';
+        img.loading = 'lazy';
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'emoji-name';
+        nameDiv.textContent = name;
+        // Add tooltip with full path
+        nameDiv.title = filename;
+
+        card.appendChild(img);
+        card.appendChild(nameDiv);
+        grid.appendChild(card);
+    });
+
+    // Update pagination buttons
+    document.getElementById('first-btn').disabled = currentPage === 1;
+    document.getElementById('prev-btn').disabled = currentPage === 1;
+    document.getElementById('next-btn').disabled = currentPage === totalPages;
+    document.getElementById('last-btn').disabled = currentPage === totalPages;
+    document.getElementById('page-jump').value = currentPage;
+}
+
+function goToPage(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    localStorage.setItem('emojiCurrentPage', currentPage);
+    updateStats();
+    renderPage();
+}

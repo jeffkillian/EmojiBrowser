@@ -22,6 +22,7 @@ A web-based emoji browser with pagination, search, and selection tracking. Perfe
 ### Quick Start
 
 1. Clone this repository:
+
    ```bash
    cd ~/Development
    git clone <your-repo-url>
@@ -29,6 +30,7 @@ A web-based emoji browser with pagination, search, and selection tracking. Perfe
    ```
 
 2. Add your emoji images to the emoji directory (it will recursively look, so adding folders in there is fine):
+
    ```bash
    mkdir emojis
    cp /path/to/your/emoji/images/* emojis/
@@ -46,29 +48,34 @@ That's it! The browser will automatically open to `http://localhost:8000/emoji_b
 If you prefer to run the steps manually:
 
 1. Clone this repository:
+
    ```bash
    cd ~/Development
-   git clone <your-repo-url>
+   git clone https://github.com/jeffkillian/EmojiBrowser
    cd EmojiBrowser
    ```
 
 2. Create an `emojis` directory:
+
    ```bash
    mkdir emojis
    ```
 
 3. Copy your emoji images into the `emojis/` directory:
+
    ```bash
    cp /path/to/your/emoji/images/* emojis/
    ```
 
 4. Generate the HTML file with embedded emoji data:
+
    ```bash
    chmod +x generate_html.sh
    ./generate_html.sh
    ```
 
 5. Start the server:
+
    ```bash
    node start_server.js
    ```
@@ -106,6 +113,7 @@ When you select emojis, they are automatically copied to the `selected/` folder 
 For emojis that are split into grids (like `big-thinking-11`, `big-thinking-12`, etc.), you can generate Slack-ready text:
 
 Example for a 4x4 grid:
+
 ```
 :big-thinking-11::big-thinking-12::big-thinking-13::big-thinking-14:
 :big-thinking-21::big-thinking-22::big-thinking-23::big-thinking-24:
@@ -123,10 +131,12 @@ EmojiBrowser/
 ├── start.sh               # One-command start script
 ├── start_server.js        # Node.js server
 ├── index.html             # HTML template
-├── generate_html.sh       # Script to generate final HTML
+├── app.js                 # JavaScript template
+├── generate_html.sh       # Script to generate final HTML and JS
 ├── emojis/               # Place your emoji images here (not tracked in git)
 ├── selected/             # Auto-generated folder for selected emojis (not tracked in git)
-└── emoji_browser.html    # Generated HTML (not tracked in git)
+├── emoji_browser.html    # Generated HTML (not tracked in git)
+└── emoji_browser.js      # Generated JavaScript (not tracked in git)
 ```
 
 ## Configuration
@@ -134,6 +144,7 @@ EmojiBrowser/
 ### Change Port
 
 Edit `start_server.js` and modify:
+
 ```javascript
 const PORT = 8000;
 ```
@@ -141,6 +152,7 @@ const PORT = 8000;
 ### Change Items Per Page
 
 Edit `index.html` and modify:
+
 ```javascript
 const itemsPerPage = 50;
 ```
@@ -166,6 +178,7 @@ Make sure you've created the `emojis/` directory and added your emoji images to 
 ### Server won't start on port 8000
 
 Another process might be using port 8000. Either:
+
 - Kill the existing process: `lsof -ti :8000 | xargs kill`
 - Change the port in `start_server.js`
 
