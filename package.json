@@ -1,0 +1,21 @@
+{
+  "name": "emoji-browser",
+  "version": "1.0.0",
+  "description": "A web-based emoji browser with pagination, search, and selection tracking",
+  "main": "start_server.js",
+  "scripts": {
+    "start": "node start_server.js",
+    "generate": "./generate_html.sh"
+  },
+  "keywords": [
+    "emoji",
+    "browser",
+    "slack",
+    "image-browser"
+  ],
+  "author": "Jeff",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}

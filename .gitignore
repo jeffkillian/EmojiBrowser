@@ -1,0 +1,28 @@
+# Emoji images (users should provide their own)
+emojis/
+
+# Selected emojis folder
+selected/
+
+# Generated files
+emoji_browser.html
+emoji_list.txt
+emoji_array.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Node modules (if any dependencies are added in the future)
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
