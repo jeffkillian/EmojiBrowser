@@ -1,6 +1,6 @@
 # EmojiBrowser
 
-A web-based emoji browser with pagination, search, and selection tracking. Perfect for browsing large collections of custom Slack emojis.
+A web-based emoji browser with pagination, search, and selection tracking. Perfect for browsing large collections of custom Slack emojis or images. within a directory.
 
 ![EmojiBrowser Screenshot](screenshot.png)
 
@@ -27,7 +27,7 @@ A web-based emoji browser with pagination, search, and selection tracking. Perfe
 
    ```bash
    cd ~/Development
-   git clone <your-repo-url>
+   git clone https://github.com/jeffkillian/EmojiBrowser
    cd EmojiBrowser
    ```
 
