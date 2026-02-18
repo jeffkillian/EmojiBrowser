@@ -51,16 +51,18 @@ const server = http.createServer((req, res) => {
 
     // API endpoints for file operations
     if (req.method === 'GET' && req.url === '/api/selected') {
-        // Return list of files in selected directory
-        fs.readdir('./selected', (err, files) => {
-            if (err) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: err.message }));
-            } else {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ files: files }));
-            }
-        });
+        // Return list of files in selected directory recursively
+        const { execSync } = require('child_process');
+        try {
+            const files = execSync('find ./selected -type f 2>/dev/null | sed "s|^./selected/||"', { encoding: 'utf8' })
+                .split('\n')
+                .filter(f => f.length > 0);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ files: files }));
+        } catch (err) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ files: [] }));
+        }
         return;
     }
 
@@ -75,16 +77,27 @@ const server = http.createServer((req, res) => {
             const sourcePath = path.join('./emojis', data.filename);
             const destPath = path.join('./selected', data.filename);
 
-            fs.copyFile(sourcePath, destPath, (error) => {
-                if (error) {
-                    console.error('Copy error:', error);
+            // Create subdirectories if needed
+            const destDir = path.dirname(destPath);
+            fs.mkdir(destDir, { recursive: true }, (mkdirError) => {
+                if (mkdirError) {
+                    console.error('Mkdir error:', mkdirError);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: error.message }));
-                } else {
-                    console.log(`Copied: ${data.filename}`);
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: true }));
+                    res.end(JSON.stringify({ error: mkdirError.message }));
+                    return;
                 }
+
+                fs.copyFile(sourcePath, destPath, (error) => {
+                    if (error) {
+                        console.error('Copy error:', error);
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: error.message }));
+                    } else {
+                        console.log(`Copied: ${data.filename}`);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true }));
+                    }
+                });
             });
         });
         return;

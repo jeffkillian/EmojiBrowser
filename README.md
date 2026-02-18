@@ -28,7 +28,7 @@ A web-based emoji browser with pagination, search, and selection tracking. Perfe
    cd EmojiBrowser
    ```
 
-2. Add your emoji images:
+2. Add your emoji images to the emoji directory (it will recursively look, so adding folders in there is fine):
    ```bash
    mkdir emojis
    cp /path/to/your/emoji/images/* emojis/
