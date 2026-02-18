@@ -30,11 +30,13 @@ A web-based emoji browser with pagination, search, and selection tracking. Perfe
    cd EmojiBrowser
    ```
 
-2. (Optional) Add your own emoji images to the `emojis/` directory. The repo includes sample images to get you started:
+2. (Optional) Add your own emoji images directly to the `emojis/` directory. The repo includes sample images to get you started:
 
    ```bash
    cp /path/to/your/emoji/images/* emojis/
    ```
+
+   **Note:** Place image files directly in the `emojis/` folder - subfolders are not supported.
 
 3. Run the start script:
    ```bash
@@ -55,11 +57,13 @@ If you prefer to run the steps manually:
    cd EmojiBrowser
    ```
 
-2. (Optional) Add your own emoji images to the `emojis/` directory. The repo includes sample images to get you started:
+2. (Optional) Add your own emoji images directly to the `emojis/` directory. The repo includes sample images to get you started:
 
    ```bash
    cp /path/to/your/emoji/images/* emojis/
    ```
+
+   **Note:** Place image files directly in the `emojis/` folder - subfolders are not supported.
 
 3. Generate the HTML file with embedded emoji data:
 

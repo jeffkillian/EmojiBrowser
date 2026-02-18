@@ -1,7 +1,10 @@
-# Emoji images (users should provide their own)
+# Emoji images (users should provide their own, but we keep sample images)
 emojis/*
 !emojis/.gitkeep
-!emojis/sample-images/
+!emojis/_awesome_.png
+!emojis/_cat.png
+!emojis/rickroll.gif
+!emojis/spooky.jpg
 
 # Selected emojis folder
 selected/*

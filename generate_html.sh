@@ -10,10 +10,9 @@ fi
 
 echo "Generating emoji data..."
 
-# Create list of emoji files recursively
-# Find all files in emojis directory and subdirectories
-# Remove the "emojis/" prefix to get relative paths
-find emojis -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.gif" -o -iname "*.svg" \) | sed 's|^emojis/||' | sort > emoji_list.txt
+# Create list of emoji files in emojis directory (not subdirectories)
+# Only look at files directly in emojis/, not nested folders
+find emojis -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.gif" -o -iname "*.svg" \) | sed 's|^emojis/||' | sort > emoji_list.txt
 
 # Generate properly formatted JSON array
 cat emoji_list.txt | awk 'BEGIN {print ""} {

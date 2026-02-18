@@ -95,9 +95,7 @@ function renderSelectedGrid() {
     const selectedArray = [...selectedEmojis].sort();
 
     selectedArray.forEach(filename => {
-        // Extract just the basename for display
-        const basename = filename.split('/').pop();
-        const name = basename.replace(/\.[^.]*$/, '');
+        const name = filename.replace(/\.[^.]*$/, '');
 
         const card = document.createElement('div');
         card.className = 'emoji-card selected';
@@ -114,8 +112,6 @@ function renderSelectedGrid() {
         const nameDiv = document.createElement('div');
         nameDiv.className = 'emoji-name';
         nameDiv.textContent = name;
-        // Add tooltip with full path
-        nameDiv.title = filename;
 
         card.appendChild(img);
         card.appendChild(nameDiv);
@@ -247,9 +243,7 @@ function renderPage() {
     const pageEmojis = filteredEmojis.slice(start, end);
 
     pageEmojis.forEach(filename => {
-        // Extract just the basename for display
-        const basename = filename.split('/').pop();
-        const name = basename.replace(/\.[^.]*$/, '');
+        const name = filename.replace(/\.[^.]*$/, '');
 
         const card = document.createElement('div');
         card.className = 'emoji-card';
@@ -271,8 +265,6 @@ function renderPage() {
         const nameDiv = document.createElement('div');
         nameDiv.className = 'emoji-name';
         nameDiv.textContent = name;
-        // Add tooltip with full path
-        nameDiv.title = filename;
 
         card.appendChild(img);
         card.appendChild(nameDiv);
