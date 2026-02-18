@@ -30,13 +30,22 @@ A web-based emoji browser with pagination, search, and selection tracking. Perfe
    cd EmojiBrowser
    ```
 
-2. (Optional) Add your own emoji images directly to the `emojis/` directory. The repo includes sample images to get you started:
+2. (Optional) Add your own emoji images directly to the `emojis/` directory, or point to a different folder using `config.json`:
 
+   **Option A:** Add images to the default `emojis/` folder:
    ```bash
    cp /path/to/your/emoji/images/* emojis/
    ```
 
-   **Note:** Place image files directly in the `emojis/` folder - subfolders are not supported.
+   **Option B:** Point to an existing folder by editing `config.json`:
+   ```json
+   {
+     "emojiDirectory": "~/Downloads/my-emojis",
+     "port": 8000
+   }
+   ```
+
+   **Note:** By default, the app uses the included `emojis/` folder with sample images. Place image files directly in your chosen folder - subfolders are not supported.
 
 3. Run the start script:
    ```bash
@@ -139,7 +148,7 @@ EmojiBrowser/
 
 ## Configuration
 
-The app uses a `config.json` file for configuration:
+The app uses a `config.json` file for configuration. By default, it uses the included `emojis/` folder:
 
 ```json
 {
@@ -150,16 +159,35 @@ The app uses a `config.json` file for configuration:
 
 ### Change Emoji Directory
 
-To point to a different directory of images, edit `config.json`:
+You can point the app to any folder on your system by editing `config.json`. This is useful if you already have a folder of images elsewhere and don't want to copy them.
+
+**Examples:**
 
 ```json
+// Use a folder in your home directory
 {
-  "emojiDirectory": "/Users/yourname/Pictures/slack-emojis",
+  "emojiDirectory": "~/Downloads/slack-emojis",
   "port": 8000
 }
 ```
 
-You can use relative or absolute paths. After changing the directory, run `./generate_html.sh` to regenerate the browser.
+```json
+// Use an absolute path
+{
+  "emojiDirectory": "/Users/yourname/Pictures/my-emojis",
+  "port": 8000
+}
+```
+
+```json
+// Use a relative path
+{
+  "emojiDirectory": "../another-folder",
+  "port": 8000
+}
+```
+
+After changing the directory, run `./generate_html.sh` to regenerate the browser with the new image list.
 
 **Note:** Image files must be directly in the specified directory - subfolders are not supported.
 
