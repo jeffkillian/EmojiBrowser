@@ -1,8 +1,35 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const PORT = 8000;
+// Load configuration
+const config = require('./config.json');
+
+// Check if config has changed since last generation
+if (fs.existsSync('./.last-generation-config.json')) {
+    const lastConfig = JSON.parse(fs.readFileSync('./.last-generation-config.json', 'utf8'));
+    if (lastConfig.emojiDirectory !== config.emojiDirectory) {
+        console.error('\n⚠️  Configuration has changed since last generation!');
+        console.error(`   Previous emoji directory: ${lastConfig.emojiDirectory}`);
+        console.error(`   Current emoji directory:  ${config.emojiDirectory}`);
+        console.error('\n   Please run: ./generate_html.sh\n');
+        process.exit(1);
+    }
+} else if (!fs.existsSync('./emoji_browser.html') || !fs.existsSync('./emoji_browser.js')) {
+    console.error('\n⚠️  Generated files not found!');
+    console.error('   Please run: ./generate_html.sh\n');
+    process.exit(1);
+}
+
+// Expand ~ to home directory if present
+let emojiDir = config.emojiDirectory;
+if (emojiDir.startsWith('~/')) {
+    emojiDir = path.join(os.homedir(), emojiDir.slice(2));
+}
+const EMOJI_DIR = emojiDir;
+const SELECTED_DIR = './selected';
+const PORT = config.port;
 
 const mimeTypes = {
     '.html': 'text/html',
@@ -18,17 +45,17 @@ const mimeTypes = {
 };
 
 // Check if emojis directory exists
-if (!fs.existsSync('./emojis')) {
-    console.error('Error: "emojis" directory not found!');
-    console.error('Please create an "emojis" directory and add your emoji images to it.');
+if (!fs.existsSync(EMOJI_DIR)) {
+    console.error(`Error: Emoji directory "${EMOJI_DIR}" not found!`);
+    console.error(`Please check your config.json or create the directory and add your emoji images to it.`);
     console.error('Then run: ./generate_html.sh');
     process.exit(1);
 }
 
 // Create selected directory if it doesn't exist
-if (!fs.existsSync('./selected')) {
-    fs.mkdirSync('./selected');
-    console.log('Created "selected" directory');
+if (!fs.existsSync(SELECTED_DIR)) {
+    fs.mkdirSync(SELECTED_DIR, { recursive: true });
+    console.log(`Created "${SELECTED_DIR}" directory`);
 }
 
 // Helper to parse JSON body
@@ -52,7 +79,7 @@ const server = http.createServer((req, res) => {
     // API endpoints for file operations
     if (req.method === 'GET' && req.url === '/api/selected') {
         // Return list of files in selected directory (flat structure)
-        fs.readdir('./selected', (err, files) => {
+        fs.readdir(SELECTED_DIR, (err, files) => {
             if (err) {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ files: [] }));
@@ -60,7 +87,7 @@ const server = http.createServer((req, res) => {
                 // Filter out directories, only return files
                 const fileList = files.filter(f => {
                     try {
-                        return fs.statSync(path.join('./selected', f)).isFile();
+                        return fs.statSync(path.join(SELECTED_DIR, f)).isFile();
                     } catch {
                         return false;
                     }
@@ -80,9 +107,9 @@ const server = http.createServer((req, res) => {
                 return;
             }
 
-            const sourcePath = path.join('./emojis', data.filename);
+            const sourcePath = path.join(EMOJI_DIR, data.filename);
             // Flatten structure - just use basename for destination
-            const destPath = path.join('./selected', path.basename(data.filename));
+            const destPath = path.join(SELECTED_DIR, path.basename(data.filename));
 
             fs.copyFile(sourcePath, destPath, (error) => {
                 if (error) {
@@ -108,7 +135,7 @@ const server = http.createServer((req, res) => {
             }
 
             // Use basename since we flatten the structure
-            const filePath = path.join('./selected', path.basename(data.filename));
+            const filePath = path.join(SELECTED_DIR, path.basename(data.filename));
 
             fs.unlink(filePath, (error) => {
                 if (error && error.code !== 'ENOENT') {
@@ -129,6 +156,12 @@ const server = http.createServer((req, res) => {
     let filePath = '.' + decodeURIComponent(req.url);
     if (filePath === './') {
         filePath = './emoji_browser.html';
+    }
+
+    // Special handling for emoji files - serve from configured emoji directory
+    if (req.url.startsWith('/emojis/')) {
+        const emojiFile = req.url.substring('/emojis/'.length);
+        filePath = path.join(EMOJI_DIR, emojiFile);
     }
 
     const extname = String(path.extname(filePath)).toLowerCase();

@@ -2,17 +2,25 @@
 
 # Script to generate the final HTML and JS with emoji data embedded
 
-if [ ! -d "emojis" ]; then
-    echo "Error: 'emojis' directory not found!"
-    echo "Please create an 'emojis' directory and add your emoji images to it."
+# Read emoji directory from config.json
+EMOJI_DIR=$(node -e "console.log(require('./config.json').emojiDirectory)")
+
+# Expand ~ to home directory if present
+if [[ "$EMOJI_DIR" == "~/"* ]]; then
+    EMOJI_DIR="${HOME}/${EMOJI_DIR#~/}"
+fi
+
+if [ ! -d "$EMOJI_DIR" ]; then
+    echo "Error: Emoji directory '$EMOJI_DIR' not found!"
+    echo "Please check your config.json or create the directory and add your emoji images to it."
     exit 1
 fi
 
-echo "Generating emoji data..."
+echo "Generating emoji data from '$EMOJI_DIR'..."
 
-# Create list of emoji files in emojis directory (not subdirectories)
-# Only look at files directly in emojis/, not nested folders
-find emojis -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.gif" -o -iname "*.svg" \) | sed 's|^emojis/||' | sort > emoji_list.txt
+# Create list of emoji files in emoji directory (not subdirectories)
+# Only look at files directly in the directory, not nested folders
+find "$EMOJI_DIR" -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.gif" -o -iname "*.svg" \) | sed "s|^$EMOJI_DIR/||" | sort > emoji_list.txt
 
 # Generate properly formatted JSON array
 cat emoji_list.txt | awk 'BEGIN {print ""} {
@@ -35,6 +43,9 @@ sed 's/app\.js/emoji_browser.js/g' index.html > emoji_browser.html
 
 # Count emojis
 EMOJI_COUNT=$(wc -l < emoji_list.txt | tr -d ' ')
+
+# Save the config used for this generation
+cp config.json .last-generation-config.json
 
 echo "✓ Generated emoji_browser.html and emoji_browser.js with $EMOJI_COUNT emojis"
 echo "✓ You can now start the server with: node start_server.js"

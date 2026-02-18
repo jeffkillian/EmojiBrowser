@@ -15,6 +15,7 @@ emoji_browser.html
 emoji_browser.js
 emoji_list.txt
 emoji_array.txt
+.last-generation-config.json
 
 # OS files
 .DS_Store

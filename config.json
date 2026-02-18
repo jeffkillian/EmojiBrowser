@@ -1,0 +1,6 @@
+{
+  "_comment": "After changing emojiDirectory, run: ./generate_html.sh",
+  "_example_directory": "/Users/jeff/Downloads/slack-images",
+  "emojiDirectory": "emojis",
+  "port": 8000
+}

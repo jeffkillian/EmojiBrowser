@@ -139,17 +139,37 @@ EmojiBrowser/
 
 ## Configuration
 
+The app uses a `config.json` file for configuration:
+
+```json
+{
+  "emojiDirectory": "emojis",
+  "port": 8000
+}
+```
+
+### Change Emoji Directory
+
+To point to a different directory of images, edit `config.json`:
+
+```json
+{
+  "emojiDirectory": "/Users/yourname/Pictures/slack-emojis",
+  "port": 8000
+}
+```
+
+You can use relative or absolute paths. After changing the directory, run `./generate_html.sh` to regenerate the browser.
+
+**Note:** Image files must be directly in the specified directory - subfolders are not supported.
+
 ### Change Port
 
-Edit `start_server.js` and modify:
-
-```javascript
-const PORT = 8000;
-```
+Edit `config.json` and modify the `port` value.
 
 ### Change Items Per Page
 
-Edit `index.html` and modify:
+Edit `app.js` and modify:
 
 ```javascript
 const itemsPerPage = 50;
