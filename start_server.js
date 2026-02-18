@@ -3,8 +3,6 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 8000;
-const EMOJIS_DIR = './emojis';
-const SELECTED_DIR = './selected';
 
 const mimeTypes = {
     '.html': 'text/html',
@@ -20,7 +18,7 @@ const mimeTypes = {
 };
 
 // Check if emojis directory exists
-if (!fs.existsSync(EMOJIS_DIR)) {
+if (!fs.existsSync('./emojis')) {
     console.error('Error: "emojis" directory not found!');
     console.error('Please create an "emojis" directory and add your emoji images to it.');
     console.error('Then run: ./generate_html.sh');
@@ -28,8 +26,8 @@ if (!fs.existsSync(EMOJIS_DIR)) {
 }
 
 // Create selected directory if it doesn't exist
-if (!fs.existsSync(SELECTED_DIR)) {
-    fs.mkdirSync(SELECTED_DIR);
+if (!fs.existsSync('./selected')) {
+    fs.mkdirSync('./selected');
     console.log('Created "selected" directory');
 }
 
@@ -54,7 +52,7 @@ const server = http.createServer((req, res) => {
     // API endpoints for file operations
     if (req.method === 'GET' && req.url === '/api/selected') {
         // Return list of files in selected directory
-        fs.readdir(SELECTED_DIR, (err, files) => {
+        fs.readdir('./selected', (err, files) => {
             if (err) {
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: err.message }));
@@ -74,8 +72,8 @@ const server = http.createServer((req, res) => {
                 return;
             }
 
-            const sourcePath = path.join(EMOJIS_DIR, data.filename);
-            const destPath = path.join(SELECTED_DIR, data.filename);
+            const sourcePath = path.join('./emojis', data.filename);
+            const destPath = path.join('./selected', data.filename);
 
             fs.copyFile(sourcePath, destPath, (error) => {
                 if (error) {
@@ -100,7 +98,7 @@ const server = http.createServer((req, res) => {
                 return;
             }
 
-            const filePath = path.join(SELECTED_DIR, data.filename);
+            const filePath = path.join('./selected', data.filename);
 
             fs.unlink(filePath, (error) => {
                 if (error && error.code !== 'ENOENT') {

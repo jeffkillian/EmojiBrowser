@@ -120,6 +120,7 @@ Just paste this into Slack to display the full emoji!
 ```
 EmojiBrowser/
 ├── README.md              # This file
+├── start.sh               # One-command start script
 ├── start_server.js        # Node.js server
 ├── index.html             # HTML template
 ├── generate_html.sh       # Script to generate final HTML
